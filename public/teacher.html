@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>💖 Word Rain Control</title>
+<script src="/socket.io/socket.io.js"></script>
+
+<style>
+body{
+font-family:sans-serif;
+background:#ffd9ec;
+text-align:center;
+}
+
+textarea{
+border-radius:10px;
+padding:10px;
+}
+
+button{
+background:#ff6fa8;
+color:white;
+border:none;
+padding:10px 20px;
+margin:10px;
+font-size:16px;
+border-radius:10px;
+cursor:pointer;
+}
+
+h2{color:#ff2f8b}
+</style>
+
+</head>
+
+<body>
+
+<h2>💖 Word Rain 교사 컨트롤</h2>
+
+<textarea id="words" rows="10" cols="40">
+apple=사과
+river=강
+mountain=산
+music=음악
+flower=꽃
+teacher=선생님
+student=학생
+book=책
+school=학교
+water=물
+</textarea>
+
+<br>
+
+<button onclick="setWords()">📚 단어 설정</button>
+<button onclick="start()">🚀 게임 시작</button>
+
+<h3>📱 학생 접속 QR</h3>
+
+<img id="qr">
+
+<h3>👥 접속 학생</h3>
+<div id="students"></div>
+
+<script>
+
+const socket=io();
+
+const studentURL=window.location.origin;
+
+document.getElementById("qr").src=
+"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+studentURL;
+
+function parseWords(){
+ const lines=document.getElementById("words").value.split("\n");
+ return lines.map(l=>{
+   const p=l.split("=");
+   return {word:p[0],meaning:p[1]};
+ });
+}
+
+function setWords(){
+ socket.emit("setWords",parseWords());
+ alert("단어 설정 완료 📚");
+}
+
+function start(){
+ socket.emit("startGame");
+ window.location.href="/teacher-game.html";
+}
+
+socket.on("playerList",(list)=>{
+ document.getElementById("students").innerHTML=list.join("<br>");
+});
+
+</script>
+
+</body>
+</html>
