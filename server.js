@@ -15,7 +15,6 @@ let activeWords=[];
 let shownWords=[];
 let gameRunning=false;
 let nextId=1;
-let spawnTimer=null;
 
 function rankings(){
  return Object.values(players).sort((a,b)=>b.score-a.score);
@@ -30,17 +29,17 @@ function spawnBatch(){
 
  if(!gameRunning || words.length===0) return;
 
- const count=3+Math.floor(Math.random()*3); // 3~5 words at once
+ const count=3+Math.floor(Math.random()*3);
 
  for(let i=0;i<count;i++){
 
   const w=words[Math.floor(Math.random()*words.length)];
 
   const speeds=[
-   {speed:0.08,points:2},
-   {speed:0.12,points:4},
-   {speed:0.16,points:6},
-   {speed:0.22,points:10}
+   {speed:0.06,points:2},
+   {speed:0.09,points:4},
+   {speed:0.12,points:6},
+   {speed:0.16,points:10}
   ];
 
   const t=speeds[Math.floor(Math.random()*speeds.length)];
@@ -48,7 +47,7 @@ function spawnBatch(){
   const obj={
    id:nextId++,
    word:w.word,
-   meaning:w.meaning,
+   meaning:w.meaning.trim(),
    speed:t.speed,
    points:t.points,
    x:Math.random()*85+5
@@ -63,7 +62,7 @@ function spawnBatch(){
   io.emit("spawnWord",obj);
  }
 
- spawnTimer=setTimeout(spawnBatch,2000);
+ setTimeout(spawnBatch,2500);
 }
 
 io.on("connection",(socket)=>{
@@ -90,14 +89,16 @@ io.on("connection",(socket)=>{
 
   broadcast();
   spawnBatch();
-
  });
 
  socket.on("answer",(text)=>{
 
   if(!gameRunning) return;
 
+  text=text.trim();
+
   const found=activeWords.find(w=>w.meaning===text);
+
   if(!found) return;
 
   activeWords=activeWords.filter(w=>w.id!==found.id);
@@ -105,13 +106,11 @@ io.on("connection",(socket)=>{
   const p=players[socket.id];
 
   let pts=found.points;
-
   p.streak++;
 
   let combo="";
   if(p.streak>=3){ pts+=2; combo="🔥3 COMBO!" }
   if(p.streak>=5){ pts+=4; combo="🔥🔥5 COMBO!" }
-  if(p.streak>=7){ pts+=6; combo="🔥🔥🔥7 COMBO!" }
 
   p.score+=pts;
 
@@ -123,19 +122,16 @@ io.on("connection",(socket)=>{
   });
 
   broadcast();
-
  });
 
  socket.on("endGame",()=>{
 
   gameRunning=false;
-  clearTimeout(spawnTimer);
 
   io.emit("gameEnded",{
    rankings:rankings(),
    words:shownWords
   });
-
  });
 
  socket.on("disconnect",()=>{
@@ -145,4 +141,4 @@ io.on("connection",(socket)=>{
 
 });
 
-server.listen(3000,()=>console.log("Word Rain v13 running"));
+server.listen(3000,()=>console.log("Word Rain v14 running"));

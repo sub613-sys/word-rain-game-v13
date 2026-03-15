@@ -5,33 +5,11 @@
 <meta charset="UTF-8">
 <title>💖 Word Rain Control</title>
 <script src="/socket.io/socket.io.js"></script>
-
 <style>
-body{
-font-family:sans-serif;
-background:#ffd9ec;
-text-align:center;
-}
-
-textarea{
-border-radius:10px;
-padding:10px;
-}
-
-button{
-background:#ff6fa8;
-color:white;
-border:none;
-padding:10px 20px;
-margin:10px;
-font-size:16px;
-border-radius:10px;
-cursor:pointer;
-}
-
-h2{color:#ff2f8b}
+body{background:#ffd9ec;font-family:sans-serif;text-align:center}
+button{background:#ff6fa8;color:white;border:none;padding:10px 20px;border-radius:10px;margin:10px}
+textarea{border-radius:10px;padding:10px}
 </style>
-
 </head>
 
 <body>
@@ -56,8 +34,7 @@ water=물
 <button onclick="setWords()">📚 단어 설정</button>
 <button onclick="start()">🚀 게임 시작</button>
 
-<h3>📱 학생 접속 QR</h3>
-
+<h3>📱 학생 QR</h3>
 <img id="qr">
 
 <h3>👥 접속 학생</h3>
@@ -67,10 +44,9 @@ water=물
 
 const socket=io();
 
-const studentURL=window.location.origin;
-
+const url=window.location.origin;
 document.getElementById("qr").src=
-"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+studentURL;
+"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+url;
 
 function parseWords(){
  const lines=document.getElementById("words").value.split("\n");
@@ -82,7 +58,7 @@ function parseWords(){
 
 function setWords(){
  socket.emit("setWords",parseWords());
- alert("단어 설정 완료 📚");
+ alert("단어 설정 완료");
 }
 
 function start(){
@@ -95,6 +71,5 @@ socket.on("playerList",(list)=>{
 });
 
 </script>
-
 </body>
 </html>

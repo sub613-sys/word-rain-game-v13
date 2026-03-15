@@ -7,40 +7,10 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
-
-body{
-background:#ffe4f1;
-font-family:sans-serif;
-text-align:center;
-}
-
-#game{
-position:relative;
-height:520px;
-border:4px solid #ff7fb0;
-border-radius:20px;
-margin:20px;
-overflow:hidden;
-background:white;
-}
-
-.word{
-position:absolute;
-background:#fff0f7;
-padding:8px 14px;
-border-radius:20px;
-font-weight:bold;
-color:#ff2f8b;
-box-shadow:0 2px 5px rgba(0,0,0,0.2);
-}
-
-.popup{
-position:absolute;
-font-size:24px;
-font-weight:bold;
-color:#ff2f8b;
-}
-
+body{background:#ffe4f1;font-family:sans-serif;text-align:center}
+#game{position:relative;height:520px;border:4px solid #ff7fb0;border-radius:20px;margin:20px;overflow:hidden;background:white}
+.word{position:absolute;background:#fff0f7;padding:8px 14px;border-radius:20px;font-weight:bold;color:#ff2f8b}
+.popup{position:absolute;font-size:24px;font-weight:bold;color:#ff2f8b}
 </style>
 
 </head>
@@ -56,14 +26,20 @@ color:#ff2f8b;
 
 <button onclick="end()">🛑 게임 종료</button>
 
-<audio id="bgm" autoplay loop>
-<source src="https://cdn.pixabay.com/audio/2023/03/23/audio_3c2c9f.mp3">
+<audio id="bgm" loop>
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_8f6c7f8b6b.mp3">
 </audio>
 
 <script>
 
 const socket=io();
 const game=document.getElementById("game");
+const bgm=document.getElementById("bgm");
+
+document.body.addEventListener("click",()=>{
+ bgm.play().catch(()=>{});
+},{once:true});
+
 let words={};
 
 socket.on("spawnWord",(w)=>{
@@ -75,7 +51,6 @@ socket.on("spawnWord",(w)=>{
  el.dataset.id=w.id;
 
  game.appendChild(el);
-
  words[w.id]=el;
 
  let y=0;
@@ -84,7 +59,7 @@ socket.on("spawnWord",(w)=>{
 
   if(!words[w.id]) return;
 
-  y+=w.speed*20;
+  y+=w.speed*30;
   el.style.top=y+"px";
 
   if(y>500){
@@ -94,34 +69,29 @@ socket.on("spawnWord",(w)=>{
   }
 
   requestAnimationFrame(fall);
-
  }
 
  fall();
-
 });
 
 socket.on("wordSolved",(d)=>{
 
+ const el=words[d.id];
+ if(el){ el.remove(); delete words[d.id]; }
+
  const popup=document.createElement("div");
  popup.className="popup";
-
  popup.innerText="🎉 "+d.player+" +"+d.points+" "+(d.combo||"✨");
-
  popup.style.left="35%";
  popup.style.top="200px";
 
  game.appendChild(popup);
-
  setTimeout(()=>popup.remove(),2000);
-
 });
 
 socket.on("players",(p)=>{
-
  document.getElementById("rank").innerHTML=
  p.map((x,i)=>"🏅 "+(i+1)+" "+x.name+" "+x.score).join("<br>");
-
 });
 
 socket.on("gameEnded",(data)=>{
@@ -139,7 +109,6 @@ socket.on("gameEnded",(data)=>{
  });
 
  document.body.innerHTML=html;
-
 });
 
 function end(){
@@ -147,6 +116,5 @@ function end(){
 }
 
 </script>
-
 </body>
 </html>
